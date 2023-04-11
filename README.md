@@ -4,9 +4,6 @@ Simple websocket based multiplayer uno game written with **python/FastApi** & **
 
 ## TODO:
 ### Back-end:
-* Write docker config
-* Add config to docker compose
-* Initialize fastapi project
 * Write uno client
 * Brainstorm about multiplayer
 
