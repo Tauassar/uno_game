@@ -35,7 +35,7 @@ _DEFAULT_OPTIONS = {
     },
     'api': {
         'host': '0.0.0.0',
-        'port': 5000,
+        'port': 5001,
         'log_level': 'info',
         'pagination': {
             'limit': 20,
