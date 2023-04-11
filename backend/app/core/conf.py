@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 _APP_PREFIX = 'app'
 _DEFAULT_OPTIONS = {
-    'debug': False,
+    'debug': True,
     'postgres': {
         'host': 'db',
         'port': 5432,
