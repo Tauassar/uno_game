@@ -1,10 +1,11 @@
 import sqlalchemy
-import sqlalchemy.orm
 import sqlalchemy.dialects
-from . import Base
+import sqlalchemy.orm
+
 from ...core import postgres
 from ...core import times
 from .. import schemas
+from . import Base
 
 
 class AccessToken(Base):

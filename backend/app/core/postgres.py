@@ -3,9 +3,8 @@ import typing
 
 import backoff
 import sqlalchemy
-
-from sqlalchemy.ext import asyncio as sqlalchemy_async
 import sqlalchemy.orm
+from sqlalchemy.ext import asyncio as sqlalchemy_async
 
 from . import conf
 

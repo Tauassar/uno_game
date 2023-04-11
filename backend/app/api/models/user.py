@@ -2,10 +2,11 @@ import typing
 
 import asyncpg
 import sqlalchemy
-from . import Base
+
+from ...core import postgres
 from .. import schemas
 from .. import security
-from ...core import postgres
+from . import Base
 
 
 class UserAlreadyExists(Exception):

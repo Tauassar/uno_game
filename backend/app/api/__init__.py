@@ -1,19 +1,17 @@
-import logging
-
 import asyncio
+import logging
 import typing
+
 import fastapi
-import stringcase
 import pydantic
+import stringcase
 
 from ..core import conf
 from ..core import postgres
-
-from . import middlewares
-from . import v1
-from . import services
-from . import responses
 from . import exceptions
+from . import middlewares
+from . import responses
+from . import v1
 
 
 app = fastapi.FastAPI(

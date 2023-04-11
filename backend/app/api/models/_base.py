@@ -1,4 +1,5 @@
 import sqlalchemy.ext.declarative
+
 from ...core import postgres
 
 

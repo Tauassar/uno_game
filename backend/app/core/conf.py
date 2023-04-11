@@ -50,7 +50,11 @@ _DEFAULT_OPTIONS = {
 _IGNORED_OPTIONS = []
 _DEFAULT_CONFIG_PATHS = [
     str(pathlib.Path(__file__).resolve(strict=True).parent.parent.parent / '.config.toml'),
-    str(pathlib.Path(__file__).resolve(strict=True).parent.parent.parent / 'config/config.toml'),
+    str(
+        pathlib.Path(
+            __file__,
+        ).resolve(strict=True).parent.parent.parent / 'config/config.toml',
+    ),
 ]
 
 

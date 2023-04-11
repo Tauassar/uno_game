@@ -1,5 +1,5 @@
-from .dummy import Pong  # noqa: F401
 from .dummy import DummyList  # noqa: F401
+from .dummy import Pong  # noqa: F401
 from .token import AccessTokenInternal  # noqa: F401
 from .token import RefreshTokenInternal  # noqa: F401
 from .token import TokenGet  # noqa: F401
