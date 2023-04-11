@@ -63,5 +63,4 @@ class UserCurrentEmailUpdateBody(pydantic.BaseModel):
 
 
 class UserRegistration(User):
-    asu_dkr: str
     password: str
