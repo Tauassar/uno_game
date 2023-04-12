@@ -1,12 +1,15 @@
+import logging
 import typing
 
-import asyncpg
 import sqlalchemy
 
 from ...core import postgres
 from .. import schemas
 from .. import security
 from . import Base
+
+
+logger = logging.getLogger(__name__)
 
 
 class UserAlreadyExists(Exception):
@@ -36,7 +39,7 @@ def user_query():
 
 
 async def user_create(
-    user: schemas.UserCreate,
+    user: schemas.UserRegistration,
 ):
     password_hash = security.compute_password_hash(user.password)
     user_data = user.dict()
@@ -50,15 +53,18 @@ async def user_create(
     async with session.begin():
         try:
             session.add(user)
-        except asyncpg.exceptions.UniqueViolationError as e:
+            await session.commit()
+
+        except sqlalchemy.exc.IntegrityError as e:
             await session.rollback()
-            if e.constraint_name == 'user_email_key':
+            # check for subclass of IntegrityConstraintViolationError
+            # 23 stands for sqlstate = '23000'
+            if e.orig.sqlstate.startswith('23'):
                 raise UserAlreadyExists from e
             raise e
 
-    print('created')
-
-    return await user_get(user.id)
+    await session.refresh(user)
+    return user.__dict__
 
 
 async def user_get(

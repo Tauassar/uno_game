@@ -8,11 +8,15 @@ class UserInvalidDataStatus(responses.Status):
     USER_INVALID_DATA = 'user_invalid_data'
 
 
-async def user_create(user: schemas.UserCreate):
+class UserInvalidResponse(responses.APIResponseBadRequest):
+    status: UserInvalidDataStatus
+
+
+async def user_create(user: schemas.UserRegistration):
     try:
-        user = await models.user_create(user)
-    except models.user.UserEmailAlreadyInUse as e:
-        raise exceptions.HTTPUnauthenticatedException(
-            'Could not authenticate user with provided credentials',
+        return await models.user_create(user)
+    except models.user.UserAlreadyExists as e:
+        raise exceptions.HTTPBadRequestException(
+            'User with such email or password already exists',
             status=UserInvalidDataStatus.USER_INVALID_DATA,
         ) from e

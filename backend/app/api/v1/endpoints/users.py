@@ -12,8 +12,8 @@ router = fastapi.APIRouter()
     '/register',
     summary='Register new user',
     response_model=schemas.UserGet,
-    response_description='Obtained token',
-    responses=responses.gen_responses([controllers.TokenObtainAPIResponseUnauthenticated]),
+    response_description='User registered',
+    responses=responses.gen_responses([controllers.UserInvalidResponse]),
 )
 async def register(
     user_data: schemas.UserRegistration,
