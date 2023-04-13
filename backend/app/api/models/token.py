@@ -166,7 +166,8 @@ async def token_revoke_access(access_token: str):
     ).values(is_revoked=True, revoked_at=revoked_at)
 
     session = postgres.get_session()
-    return await session.execute(query)
+    await session.execute(query)
+    await session.commit()
 
 
 async def token_revoke_access_all(client_id: int):
@@ -177,7 +178,8 @@ async def token_revoke_access_all(client_id: int):
     ).values(is_revoked=True, revoked_at=revoked_at)
 
     session = postgres.get_session()
-    return await session.execute(query)
+    await session.execute(query)
+    await session.commit()
 
 
 async def token_revoke_refresh(client_id: int):
@@ -188,4 +190,5 @@ async def token_revoke_refresh(client_id: int):
     ).values(is_revoked=True, revoked_at=revoked_at)
 
     session = postgres.get_session()
-    return await session.execute(query)
+    await session.execute(query)
+    await session.commit()
