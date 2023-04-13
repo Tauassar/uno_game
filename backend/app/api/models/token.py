@@ -102,7 +102,7 @@ def token_refresh_query():
 async def token_get_access(access_token: str) -> AccessToken:
     query = token_access_query().filter(
         AccessToken.token == access_token,
-        AccessToken.is_revoked == False or AccessToken.is_revoked != None,
+        AccessToken.is_revoked == False,
     )
 
     session = postgres.get_session()
@@ -112,8 +112,7 @@ async def token_get_access(access_token: str) -> AccessToken:
 
 async def token_get_refresh(refresh_token: str) -> RefreshToken:
     query = token_access_query().filter(
-        RefreshToken.token == refresh_token,
-        RefreshToken.is_revoked is False,
+        RefreshToken.token == refresh_token and RefreshToken.is_revoked is False,
     )
 
     session = postgres.get_session()
@@ -121,15 +120,22 @@ async def token_get_refresh(refresh_token: str) -> RefreshToken:
     return (await session.execute(query)).scalar_one_or_none()
 
 
-async def token_get_refresh_by_client_id(user_id: int) -> RefreshToken:
-    query = token_access_query().filter(
-        RefreshToken.user_id == user_id,
-        RefreshToken.is_revoked is False,
-    )
+async def token_get_refresh_by_client_id(user_id: int, refresh_token: str = None) -> RefreshToken:
+    if refresh_token:
+        query = token_refresh_query().filter(
+            RefreshToken.user_id == user_id,
+            RefreshToken.token == refresh_token,
+            RefreshToken.is_revoked == False,
+        )
+    else:
+        query = token_refresh_query().filter(
+            RefreshToken.user_id == user_id,
+            RefreshToken.is_revoked == False,
+        )
 
     session = postgres.get_session()
 
-    return (await session.execute(query)).scalar_one_or_none()
+    return (await session.execute(query)).scalars().first()
 
 
 async def token_store_access(access_token: schemas.AccessTokenInternal):
