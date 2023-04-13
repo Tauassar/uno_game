@@ -43,7 +43,7 @@ class AccessToken(Base):
     )
     revoked_at = sqlalchemy.Column(
         sqlalchemy.DateTime(timezone=True),
-        nullable=False,
+        nullable=True,
     )
 
     user = sqlalchemy.orm.relationship(
@@ -83,7 +83,7 @@ class RefreshToken(Base):
     )
     revoked_at = sqlalchemy.Column(
         sqlalchemy.DateTime(timezone=True),
-        nullable=False,
+        nullable=True,
     )
 
     user = sqlalchemy.orm.relationship(
@@ -105,7 +105,7 @@ async def token_get_access(access_token: str) -> AccessToken:
         AccessToken.is_revoked is False,
     )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
 
     return (await session.execute(query)).scalar_one_or_none()
 
@@ -116,7 +116,7 @@ async def token_get_refresh(refresh_token: str) -> RefreshToken:
         RefreshToken.is_revoked is False,
     )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
 
     return (await session.execute(query)).scalar_one_or_none()
 
@@ -127,7 +127,7 @@ async def token_get_refresh_by_client_id(user_id: int) -> RefreshToken:
         RefreshToken.is_revoked is False,
     )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
 
     return (await session.execute(query)).scalar_one_or_none()
 
@@ -139,7 +139,7 @@ async def token_store_access(access_token: schemas.AccessTokenInternal):
         constraint='uq_accesstokens_token',
     )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
     await session.execute(query)
 
     return access_token.dict()
@@ -150,7 +150,7 @@ async def token_store_refresh(refresh_token: schemas.RefreshTokenInternal):
         **refresh_token.dict(),
     )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
     await session.execute(query)
 
     return refresh_token.dict()
@@ -163,7 +163,7 @@ async def token_revoke_access(access_token: str):
         AccessToken.token == access_token,
     ).values(is_revoked=True, revoked_at=revoked_at)
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
     return await session.execute(query)
 
 
@@ -174,7 +174,7 @@ async def token_revoke_access_all(client_id: int):
         AccessToken.client_id == client_id,
     ).values(is_revoked=True, revoked_at=revoked_at)
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
     return await session.execute(query)
 
 
@@ -185,5 +185,5 @@ async def token_revoke_refresh(client_id: int):
         RefreshToken.client_id == client_id,
     ).values(is_revoked=True, revoked_at=revoked_at)
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
     return await session.execute(query)

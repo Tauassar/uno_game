@@ -148,23 +148,19 @@ async def user_list():
 #
 #
 #
-# async def user_get_by_email(email: str):
-#     query = user_query().where(
-#         sqlalchemy.and_(
-#             User.c.email == email.lower(),
-#             User.c.is_active.is_(True),
-#         ),
-#     )
-#
-#     query = query.with_only_columns(
-#         *User.c,
-#     )
-#
-#     user = await postgres.get_session().fetch_one(query)
-#
-#     if not user:
-#         return None
-#
-#     return {
-#         **user,
-#     }
+async def user_get_by_email(email: str):
+    query = user_query().where(
+        User.email == email.lower(),
+        User.is_active == True,
+    )
+
+    users = await postgres.get_session().execute(query)
+
+    (user,) = users.first()
+
+    if not user:
+        return None
+
+    return {
+        **user.__dict__,
+    }

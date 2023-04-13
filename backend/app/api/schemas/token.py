@@ -35,7 +35,7 @@ class TokenInternalInfo(pydantic.BaseModel):
     is_revoked: pydantic.StrictBool = False
     issued_at: datetime.datetime
     revoked_at: typing.Optional[datetime.datetime] = None
-    client_id: pydantic.StrictInt
+    user_id: pydantic.StrictInt
 
     class Config:
         extra = 'forbid'
