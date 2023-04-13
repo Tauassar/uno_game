@@ -78,6 +78,7 @@ async def obtain_token(user_id: int):
         refresh_token = issued_refresh_token.dict()
 
     return schemas.TokenGet(
+        user_id=user_id,
         access_token=issued_access_token.token,
         refresh_token=refresh_token['token'],
         expires_in=issued_access_token.expires_in,

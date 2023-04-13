@@ -14,6 +14,7 @@ class TokenTypeHint(str, enum.Enum):
 
 
 class TokenGet(pydantic.BaseModel):
+    user_id: pydantic.conint(strict=True)
     access_token: pydantic.constr(strict=True, max_length=255)
     refresh_token: pydantic.constr(strict=True, max_length=127)
     token_type: pydantic.constr(strict=True, regex='bearer')  # noqa: F821
