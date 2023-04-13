@@ -1,3 +1,5 @@
+import logging
+
 import fastapi
 
 from ..core import postgres
@@ -8,6 +10,7 @@ from . import security
 
 
 TokenTypeHint = schemas.TokenTypeHint
+logger = logging.getLogger(__name__)
 
 
 class AuthCredentialsError(Exception):
@@ -47,18 +50,24 @@ async def get_current_user(
     )
 
     client_id = security.extract_client_id_from_signed_token(token)
+
     if client_id is None:
         raise unauthenticated_exception
 
+    logger.debug(f'{token = }')
     stored_access_token = await models.token_get_access(token)
+    logger.debug(f'{stored_access_token = }')
+
     if not stored_access_token:
         raise unauthenticated_exception
 
     user = await models.user_get(client_id)
+    logger.debug(f'{user = }')
+
     if user is None:
         raise unauthenticated_exception
 
-    return schemas.UserCurrent(**user)
+    return schemas.UserCurrent(**user.__dict__)
 
 
 async def obtain_token(user_id: int):

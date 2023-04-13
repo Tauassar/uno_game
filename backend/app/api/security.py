@@ -15,7 +15,9 @@ from ..core import times
 from . import schemas
 
 
-oauth2_scheme = fastapi.security.OAuth2PasswordBearer(tokenUrl='/api/v1/token')
+oauth2_scheme = fastapi.security.OAuth2PasswordBearer(
+    tokenUrl='/api/v1/token',
+)
 
 
 _BCRYPT_SALT_ROUNDS = 12

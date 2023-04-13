@@ -72,7 +72,7 @@ async def user_get(
 ) -> typing.Optional[User]:
     query = user_query().filter(
         User.id == user_id,
-        User.is_active is True,
+        User.is_active == True,
     )
 
     result = await postgres.get_session().execute(query)

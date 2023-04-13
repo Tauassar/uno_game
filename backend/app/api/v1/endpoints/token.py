@@ -1,6 +1,6 @@
+import logging
 import typing
 
-import fastapi
 import fastapi.security.oauth2
 
 from ... import auth
@@ -11,6 +11,7 @@ from ... import security
 
 
 router = fastapi.APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.post(
@@ -78,6 +79,8 @@ async def refresh_token(
 
     * `token_refresh_error` - Any error related to token refreshing
     """
+
+    logger.debug(f'{current_user = } {access_token = } {refresh_token = }')
 
     return await controllers.token_refresh(
         current_user=current_user,

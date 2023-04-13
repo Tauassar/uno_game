@@ -102,7 +102,7 @@ def token_refresh_query():
 async def token_get_access(access_token: str) -> AccessToken:
     query = token_access_query().filter(
         AccessToken.token == access_token,
-        AccessToken.is_revoked is False,
+        AccessToken.is_revoked == False or AccessToken.is_revoked != None,
     )
 
     session = postgres.get_session()
@@ -141,6 +141,7 @@ async def token_store_access(access_token: schemas.AccessTokenInternal):
 
     session = postgres.get_session()
     await session.execute(query)
+    await session.commit()
 
     return access_token.dict()
 
@@ -152,6 +153,7 @@ async def token_store_refresh(refresh_token: schemas.RefreshTokenInternal):
 
     session = postgres.get_session()
     await session.execute(query)
+    await session.commit()
 
     return refresh_token.dict()
 
