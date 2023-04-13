@@ -14,6 +14,7 @@ class TokenTypeHint(str, enum.Enum):
 
 
 class TokenGet(pydantic.BaseModel):
+    user_id: pydantic.conint(strict=True)
     access_token: pydantic.constr(strict=True, max_length=255)
     refresh_token: pydantic.constr(strict=True, max_length=127)
     token_type: pydantic.constr(strict=True, regex='bearer')  # noqa: F821
@@ -35,7 +36,7 @@ class TokenInternalInfo(pydantic.BaseModel):
     is_revoked: pydantic.StrictBool = False
     issued_at: datetime.datetime
     revoked_at: typing.Optional[datetime.datetime] = None
-    client_id: pydantic.StrictInt
+    user_id: pydantic.StrictInt
 
     class Config:
         extra = 'forbid'

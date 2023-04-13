@@ -5,6 +5,7 @@ import fastapi
 from ... import controllers
 from ... import responses
 from ... import schemas
+from ... import auth
 
 
 router = fastapi.APIRouter()
@@ -24,6 +25,7 @@ async def get_dummies(
     quantity: int,
     with_name: bool = False,
     name: typing.Optional[str] = None,
+    current_user: schemas.UserCurrent = fastapi.Security(auth.get_current_user),
 ):
     """Get a list of dummies.
 

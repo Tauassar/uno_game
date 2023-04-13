@@ -8,3 +8,5 @@ from .token import TokenRevokeBadRequestStatus  # noqa: F401
 from .token import token_obtain  # noqa: F401
 from .token import token_refresh  # noqa: F401
 from .token import token_revoke  # noqa: F401
+from .users import user_create  # noqa: F401
+from .users import UserInvalidResponse  # noqa: F401

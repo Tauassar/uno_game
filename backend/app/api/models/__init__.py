@@ -12,3 +12,4 @@ from .user import user_create  # noqa: F401
 from .user import user_delete_all  # noqa: F401
 from .user import user_get  # noqa: F401
 from .user import user_list  # noqa: F401
+from .user import user_get_by_email  # noqa: F401

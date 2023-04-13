@@ -1,3 +1,5 @@
+import logging
+
 import fastapi
 
 from ..core import postgres
@@ -8,6 +10,7 @@ from . import security
 
 
 TokenTypeHint = schemas.TokenTypeHint
+logger = logging.getLogger(__name__)
 
 
 class AuthCredentialsError(Exception):
@@ -28,6 +31,7 @@ async def authenticate_user(email: str, password: str):
         'Wrong user credentials were provided')
 
     user = await models.user_get_by_email(email.lower())
+
     if not user:
         raise auth_credentials_error
 
@@ -46,70 +50,92 @@ async def get_current_user(
     )
 
     client_id = security.extract_client_id_from_signed_token(token)
+
     if client_id is None:
         raise unauthenticated_exception
 
+    logger.debug(f'{token = }')
     stored_access_token = await models.token_get_access(token)
+    logger.debug(f'{stored_access_token = }')
+
     if not stored_access_token:
         raise unauthenticated_exception
 
     user = await models.user_get(client_id)
+    logger.debug(f'{user = }')
+
     if user is None:
         raise unauthenticated_exception
 
-    return schemas.UserCurrent(**user)
+    return schemas.UserCurrent(**user.__dict__)
 
 
-async def obtain_token(client_id: int):
+async def obtain_token(user_id: int):
     """Obtain new auth token."""
-    issued_access_token = security.issue_access_token(client_id=client_id)
 
-    async with postgres.get_session().transaction():
-        await models.token_store_access(issued_access_token)
+    issued_access_token = security.issue_access_token(user_id=user_id)
 
-        refresh_token = await models.token_get_refresh_by_client_id(client_id)
+    await models.token_store_access(issued_access_token)
 
-        if refresh_token is None:
-            issued_refresh_token = security.issue_refresh_token(client_id=client_id)
+    refresh_token = await models.token_get_refresh_by_client_id(user_id)
 
-            await models.token_store_refresh(issued_refresh_token)
+    if refresh_token is None:
+        issued_refresh_token = security.issue_refresh_token(user_id=user_id)
 
-            refresh_token = issued_refresh_token.dict()
+        await models.token_store_refresh(issued_refresh_token)
 
-        return schemas.TokenGet(
-            access_token=issued_access_token.token,
-            refresh_token=refresh_token['token'],
-            expires_in=issued_access_token.expires_in,
-            token_type=issued_access_token.token_type,
-        )
+        refresh_token = issued_refresh_token.dict()
+
+    return schemas.TokenGet(
+        user_id=user_id,
+        access_token=issued_access_token.token,
+        refresh_token=refresh_token.token,
+        expires_in=issued_access_token.expires_in,
+        token_type=issued_access_token.token_type,
+    )
 
 
 async def refresh_token(client_id: int, access_token: str, refresh_token: str):
     """Refresh previously obtained token."""
 
+    logger.debug(f'{refresh_token = }')
+
     token_refresh_error = TokenRefreshError('Invalid token was provided')
 
     stored_access_token = await models.token_get_access(access_token)
+    logger.debug(f'{stored_access_token.token = }')
     if not stored_access_token:
         raise token_refresh_error
 
     effective_client_id = security.extract_client_id_from_signed_token(access_token)
+    logger.debug(f'{effective_client_id = }')
     if effective_client_id != client_id:
         raise token_refresh_error
 
-    stored_refresh_token = await models.token_get_refresh_by_client_id(client_id)
+    stored_refresh_token = await models.token_get_refresh_by_client_id(
+        client_id,
+        refresh_token,
+    )
+    logger.debug(f'{stored_refresh_token.token = }')
     if not stored_refresh_token:
         raise token_refresh_error
 
-    if stored_refresh_token['token'] != refresh_token:
+    logger.debug(
+        'stored_refresh_token["token"] != refresh_token '
+        f'{stored_refresh_token.token != refresh_token}',
+    )
+
+    if stored_refresh_token.token != refresh_token:
         raise token_refresh_error
 
-    new_access_token = security.issue_access_token(client_id=client_id)
+    new_access_token = security.issue_access_token(user_id=client_id)
     await models.token_store_access(new_access_token)
+    logger.debug(f'{new_access_token = }')
 
     return schemas.TokenGet(
+        user_id=client_id,
         access_token=new_access_token.token,
-        refresh_token=stored_refresh_token['token'],
+        refresh_token=refresh_token,
         expires_in=new_access_token.expires_in,
         token_type=new_access_token.token_type,
     )

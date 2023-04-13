@@ -1,7 +1,7 @@
 # Dockerfile
 
 # pull the official docker image
-FROM python:3.9.13-slim-bullseye
+FROM python:3.10-slim-bullseye
 
 RUN apt-get update \
     && apt-get install -y apt-utils \

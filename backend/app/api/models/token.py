@@ -43,7 +43,7 @@ class AccessToken(Base):
     )
     revoked_at = sqlalchemy.Column(
         sqlalchemy.DateTime(timezone=True),
-        nullable=False,
+        nullable=True,
     )
 
     user = sqlalchemy.orm.relationship(
@@ -83,7 +83,7 @@ class RefreshToken(Base):
     )
     revoked_at = sqlalchemy.Column(
         sqlalchemy.DateTime(timezone=True),
-        nullable=False,
+        nullable=True,
     )
 
     user = sqlalchemy.orm.relationship(
@@ -102,34 +102,40 @@ def token_refresh_query():
 async def token_get_access(access_token: str) -> AccessToken:
     query = token_access_query().filter(
         AccessToken.token == access_token,
-        AccessToken.is_revoked is False,
+        AccessToken.is_revoked == False,
     )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
 
     return (await session.execute(query)).scalar_one_or_none()
 
 
 async def token_get_refresh(refresh_token: str) -> RefreshToken:
     query = token_access_query().filter(
-        RefreshToken.token == refresh_token,
-        RefreshToken.is_revoked is False,
+        RefreshToken.token == refresh_token and RefreshToken.is_revoked is False,
     )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
 
     return (await session.execute(query)).scalar_one_or_none()
 
 
-async def token_get_refresh_by_client_id(user_id: int) -> RefreshToken:
-    query = token_access_query().filter(
-        RefreshToken.user_id == user_id,
-        RefreshToken.is_revoked is False,
-    )
+async def token_get_refresh_by_client_id(user_id: int, refresh_token: str = None) -> RefreshToken:
+    if refresh_token:
+        query = token_refresh_query().filter(
+            RefreshToken.user_id == user_id,
+            RefreshToken.token == refresh_token,
+            RefreshToken.is_revoked == False,
+        )
+    else:
+        query = token_refresh_query().filter(
+            RefreshToken.user_id == user_id,
+            RefreshToken.is_revoked == False,
+        )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
 
-    return (await session.execute(query)).scalar_one_or_none()
+    return (await session.execute(query)).scalars().first()
 
 
 async def token_store_access(access_token: schemas.AccessTokenInternal):
@@ -139,8 +145,9 @@ async def token_store_access(access_token: schemas.AccessTokenInternal):
         constraint='uq_accesstokens_token',
     )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
     await session.execute(query)
+    await session.commit()
 
     return access_token.dict()
 
@@ -150,8 +157,9 @@ async def token_store_refresh(refresh_token: schemas.RefreshTokenInternal):
         **refresh_token.dict(),
     )
 
-    session = await postgres.get_session()
+    session = postgres.get_session()
     await session.execute(query)
+    await session.commit()
 
     return refresh_token.dict()
 
@@ -163,8 +171,9 @@ async def token_revoke_access(access_token: str):
         AccessToken.token == access_token,
     ).values(is_revoked=True, revoked_at=revoked_at)
 
-    session = await postgres.get_session()
-    return await session.execute(query)
+    session = postgres.get_session()
+    await session.execute(query)
+    await session.commit()
 
 
 async def token_revoke_access_all(client_id: int):
@@ -174,8 +183,9 @@ async def token_revoke_access_all(client_id: int):
         AccessToken.client_id == client_id,
     ).values(is_revoked=True, revoked_at=revoked_at)
 
-    session = await postgres.get_session()
-    return await session.execute(query)
+    session = postgres.get_session()
+    await session.execute(query)
+    await session.commit()
 
 
 async def token_revoke_refresh(client_id: int):
@@ -185,5 +195,6 @@ async def token_revoke_refresh(client_id: int):
         RefreshToken.client_id == client_id,
     ).values(is_revoked=True, revoked_at=revoked_at)
 
-    session = await postgres.get_session()
-    return await session.execute(query)
+    session = postgres.get_session()
+    await session.execute(query)
+    await session.commit()

@@ -15,7 +15,9 @@ from ..core import times
 from . import schemas
 
 
-oauth2_scheme = fastapi.security.OAuth2PasswordBearer(tokenUrl='/api/v1/token')
+oauth2_scheme = fastapi.security.OAuth2PasswordBearer(
+    tokenUrl='/api/v1/token',
+)
 
 
 _BCRYPT_SALT_ROUNDS = 12
@@ -104,19 +106,19 @@ def extract_client_id_from_signed_token(
 
 
 def issue_access_token(
-    client_id: int,
+    user_id: int,
     secret_key: str = conf.security.secret_key,
     expires_in: int = conf.security.token_expires_in_seconds,
 ) -> schemas.AccessTokenInternal:
     """Issue access token."""
     issued_at = times.utcnow()
     signed_token = sign_token(
-        token_data={'cid': client_id},
+        token_data={'cid': user_id},
         secret_key=secret_key,
     )
 
     return schemas.AccessTokenInternal(
-        client_id=client_id,
+        user_id=user_id,
         token=signed_token,
         is_revoked=False,
         token_type='bearer',
@@ -125,11 +127,11 @@ def issue_access_token(
     )
 
 
-def issue_refresh_token(client_id: int) -> schemas.RefreshTokenInternal:
+def issue_refresh_token(user_id: int) -> schemas.RefreshTokenInternal:
     """Issue refresh token."""
 
     return schemas.RefreshTokenInternal(
-        client_id=client_id,
+        user_id=user_id,
         token=gen_random_token(),
         is_revoked=False,
         token_type='bearer',
