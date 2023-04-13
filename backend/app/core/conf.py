@@ -31,7 +31,7 @@ _DEFAULT_OPTIONS = {
         'internal': {
             'format': '[%(process)s] [%(levelname)s] [%(name)s:%(lineno)d]: %(message)s',
         },
-        'level': 'info',
+        'level': 'debug',
     },
     'api': {
         'host': '0.0.0.0',
