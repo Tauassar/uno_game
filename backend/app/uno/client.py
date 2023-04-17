@@ -203,6 +203,7 @@ class UnoGame:
             'new_color': random.choice(list(enums.CardColors)),
         })
         self._winner = None
+        _game_sessions[match_id] = self
 
     def __next__(self):
         """
@@ -358,7 +359,16 @@ class UnoDriver:
 
     def __init__(self, player_ids: list[str], match_id: str):
         self.game = UnoGame(player_ids, match_id)
-        _game_sessions[match_id] = self.game
+        logger.debug(self.game.current_card)
+        logger.debug(self.game.current_player.user_id)
+        self.game = UnoGame(player_ids, match_id)
 
     def __call__(self, *args, **kwargs):
-        self.game.play_card()
+        self.game.play_card(
+            self.game.current_player.user_id,
+            card_raw={
+                'suit': 'FOUR',
+                'color': 'YELLOW',
+                'new_color': None,
+            },
+        )
