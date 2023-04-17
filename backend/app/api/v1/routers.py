@@ -3,8 +3,7 @@ import fastapi
 from .endpoints import dummies
 from .endpoints import token
 from .endpoints import users
-from .endpoints import websocket
-
+from .endpoints.game_sessions import websocket
 
 api_router = fastapi.APIRouter()
 api_router.include_router(dummies.router, tags=['dummies'])

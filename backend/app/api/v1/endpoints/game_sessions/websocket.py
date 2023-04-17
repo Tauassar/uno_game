@@ -1,13 +1,11 @@
-import asyncio
 import logging
 from datetime import datetime
 from typing import Union
 
-import fastapi.security.oauth2
 from fastapi import WebSocket, WebSocketDisconnect
+from . import router
 
 
-router = fastapi.APIRouter()
 logger = logging.getLogger(__name__)
 
 
@@ -40,7 +38,7 @@ async def websocket_endpoint(
         try:
             # Receive the JSON data sent by a client.
             data = await websocket.receive_json()
-            # Some (fake) heavey data processing logic.
+            # Some (fake) heavy data processing logic.
             message_processed = {
                 **data,
                 'processed': True,
